@@ -1,0 +1,30 @@
+{
+  "name": "bezel",
+  "version": "1.0.0",
+  "description": "Mobile design and engineering skill that refuses to write mobile AI-slop.",
+  "main": "skills/bezel/SKILL.md",
+  "bin": {
+    "bezel-audit": "./scripts/audit-slop.js"
+  },
+  "scripts": {
+    "audit": "node ./scripts/audit-slop.js",
+    "test": "node ./scripts/audit-slop.js ./example/bezel-transfer.tsx"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mensonones/bezel.git"
+  },
+  "keywords": [
+    "mobile",
+    "react-native",
+    "compose",
+    "swiftui",
+    "ai-agent",
+    "cursor",
+    "claude-code",
+    "design-system",
+    "anti-slop"
+  ],
+  "author": "Emerson Vieira",
+  "license": "MIT"
+}

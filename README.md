@@ -47,6 +47,27 @@ It enforces **tactile touch**, **edge-to-edge fluid layouts**, **physics-driven 
 
 ---
 
+## Proof: Slop vs. Craft Benchmark
+
+How do you know Bezel actually works? We tested the exact same prompt with a standard LLM vs Bezel:
+
+> *"Build a mobile money transfer screen with recipient selection, amount entry, and transfer confirmation."*
+
+| Metric | Standard LLM (Mobile Slop) ❌ | Bezel Standard ✨ |
+|---|---|---|
+| **Critique Score** | `T1 B2 P1 H2 G5 R2` (Fail) | `T5 B5 P5 H5 G5 R5` (100% Pass) |
+| **Quality Gates** | 8 / 60 Passed (52 Violations) | **60 / 60 Passed (0 Violations)** |
+| **Inline Styles** | 18 inline style objects (`style={{ ... }}`) | **Zero** (`StyleSheet.create`) |
+| **Status Bar** | Hardcoded letterboxing (`paddingTop: 45`) | Full edge-to-edge bleed (`useSafeAreaInsets`) |
+| **Touch Feedback** | Flat `TouchableOpacity` (opacity: 0.2) | Spring scale (`0.96`) + native Light haptics |
+| **Action Trigger** | Accidental single-tap button | **`A02 · Slide to Confirm`** with haptic lock |
+
+- 📊 **Full Shootout & Analysis:** See [`BENCHMARK.md`](BENCHMARK.md).
+- 🤖 **Automated Audit CLI:** Run `npm run audit ./example/bezel-transfer.tsx`.
+- 📱 **Interactive App Demo:** Run `cd example && npm start` to touch and compare on your phone.
+
+---
+
 ## Installation
 
 ### Option 1: Install as an Agent Skill (Recommended)
