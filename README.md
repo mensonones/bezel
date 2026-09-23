@@ -9,6 +9,10 @@
 
 Inspired by [nutlope/hallmark](https://github.com/nutlope/hallmark), Bezel replicates the anti-AI-slop design skill methodology, combinatorial structural engine, and quality gates, re-engineered from the ground up for **touchscreens, physical hardware, 120Hz refresh budgets, and cutting-edge 2025/2026 mobile design trends**.
 
+<p align="center">
+  <img src="docs/assets/comparison-hero.png" alt="Bezel vs AI Slop Comparison" width="720" />
+</p>
+
 ---
 
 ## The Problem: Mobile AI-Slop

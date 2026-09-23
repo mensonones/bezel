@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #090A0F;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #FFFFFF;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #FFF 0%, #8E8E93 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .header p {
+      font-size: 15px;
+      color: #8E8E93;
+    }
+    .comparison-container {
+      display: flex;
+      gap: 36px;
+      align-items: flex-start;
+      justify-content: center;
+    }
+    .card-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .badge {
+      font-size: 13px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge-slop {
+      background: rgba(255, 69, 58, 0.15);
+      color: #FF453A;
+      border: 1px solid rgba(255, 69, 58, 0.3);
+    }
+    .badge-bezel {
+      background: rgba(10, 132, 255, 0.15);
+      color: #0A84FF;
+      border: 1px solid rgba(10, 132, 255, 0.3);
+    }
+    .device-frame {
+      width: 390px;
+      height: 844px;
+      border-radius: 44px;
+      overflow: hidden;
+      border: 6px solid #2C2C2E;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.08);
+      background: #000;
+    }
+    .device-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .caption {
+      margin-top: 14px;
+      font-size: 13px;
+      color: #8E8E93;
+      max-width: 360px;
+      text-align: center;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>BEZEL · PROOF OF CRAFT</h1>
+    <p>Identical Prompt: "A mobile money transfer screen with recipient list"</p>
+  </div>
+
+  <div class="comparison-container">
+    <div class="card-column">
+      <div class="badge badge-slop">❌ Default Mobile AI-Slop (Score: 1/6)</div>
+      <div class="device-frame">
+        <img src="screenshot-slop.png" alt="Slop Screenshot" />
+      </div>
+      <p class="caption">Generic web centered header, 3 floating card layers, raw TextInput without tabular numbers, dead touch feedback, unsafe single-tap button.</p>
+    </div>
+
+    <div class="card-column">
+      <div class="badge badge-bezel">✨ Bezel Craft Standard (Score: 6/6 ADA)</div>
+      <div class="device-frame">
+        <img src="screenshot-bezel.png" alt="Bezel Screenshot" />
+      </div>
+      <p class="caption">OLED True Black, Inset Grouped Table with 0.5pt dividers, tabular figures, bottom thumb zone, spring tactile physics & Slide-to-Confirm.</p>
+    </div>
+  </div>
+</body>
+</html>

@@ -12,6 +12,10 @@
 amount entry, and transfer confirmation."
 ```
 
+<p align="center">
+  <img src="docs/assets/comparison-hero.png" alt="Slop vs Bezel Visual Comparison" width="700" />
+</p>
+
 ---
 
 ## 1. The Metric Scorecard

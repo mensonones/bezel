@@ -9,7 +9,15 @@ import { SlopTransferScreen } from './slop-transfer';
 import { BezelTransferScreen } from './bezel-transfer';
 
 export default function App() {
-  const [mode, setMode] = useState<'bezel' | 'slop'>('bezel');
+  const getInitialMode = (): 'bezel' | 'slop' => {
+    if (typeof window !== 'undefined' && window.location?.search?.includes('mode=slop')) {
+      return 'slop';
+    }
+    return 'bezel';
+  };
+
+  const [mode, setMode] = useState<'bezel' | 'slop'>(getInitialMode);
+  const hideToggle = typeof window !== 'undefined' && window.location?.search?.includes('hideToggle=true');
 
   const handleToggle = (newMode: 'bezel' | 'slop') => {
     Haptics.selectionAsync();
@@ -27,27 +35,29 @@ export default function App() {
           </View>
 
           {/* Floating Switcher Bar to test difference */}
-          <SafeAreaView edges={['bottom']} style={styles.floatingSwitcherContainer}>
-            <View style={styles.toggleBar}>
-              <Pressable
-                onPress={() => handleToggle('slop')}
-                style={[styles.toggleButton, mode === 'slop' && styles.toggleActiveSlop]}
-              >
-                <Text style={[styles.toggleText, mode === 'slop' && styles.toggleTextActive]}>
-                  ❌ AI-Slop Mode
-                </Text>
-              </Pressable>
+          {!hideToggle && (
+            <SafeAreaView edges={['top']} style={styles.floatingSwitcherContainer}>
+              <View style={styles.toggleBar}>
+                <Pressable
+                  onPress={() => handleToggle('slop')}
+                  style={[styles.toggleButton, mode === 'slop' && styles.toggleActiveSlop]}
+                >
+                  <Text style={[styles.toggleText, mode === 'slop' && styles.toggleTextActive]}>
+                    ❌ AI-Slop Mode
+                  </Text>
+                </Pressable>
 
-              <Pressable
-                onPress={() => handleToggle('bezel')}
-                style={[styles.toggleButton, mode === 'bezel' && styles.toggleActiveBezel]}
-              >
-                <Text style={[styles.toggleText, mode === 'bezel' && styles.toggleTextActive]}>
-                  ✨ Bezel Craft
-                </Text>
-              </Pressable>
-            </View>
-          </SafeAreaView>
+                <Pressable
+                  onPress={() => handleToggle('bezel')}
+                  style={[styles.toggleButton, mode === 'bezel' && styles.toggleActiveBezel]}
+                >
+                  <Text style={[styles.toggleText, mode === 'bezel' && styles.toggleTextActive]}>
+                    ✨ Bezel Craft
+                  </Text>
+                </Pressable>
+              </View>
+            </SafeAreaView>
+          )}
         </View>
       </SafeAreaProvider>
     </GestureHandlerRootView>

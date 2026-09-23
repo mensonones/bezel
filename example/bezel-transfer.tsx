@@ -14,7 +14,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { SlideToConfirm } from '../skills/bezel/references/components/A02-slide-to-confirm';
+import { SlideToConfirm } from './SlideToConfirm';
 
 // ✅ BEZEL VERSION: Built to the Bezel Craft Standard
 // Features: Zero inline styles, OLED True Black, Inset Grouped Table with hairlines,
@@ -30,6 +30,8 @@ const RECENT_CONTACTS = [
 
 export function BezelTransferScreen() {
   const insets = useSafeAreaInsets();
+  const safeTop = insets.top || 54;
+  const safeBottom = insets.bottom || 34;
   const [selectedContact, setSelectedContact] = useState(RECENT_CONTACTS[0]);
   const [amount, setAmount] = useState('50.00');
 
@@ -50,8 +52,8 @@ export function BezelTransferScreen() {
         contentContainerStyle={[
           styles.scrollContent,
           {
-            paddingTop: insets.top + 16,
-            paddingBottom: insets.bottom + 100, // Clearance for sticky slide-to-confirm
+            paddingTop: safeTop + 16,
+            paddingBottom: safeBottom + 100, // Clearance for sticky slide-to-confirm
           },
         ]}
         showsVerticalScrollIndicator={false}
@@ -90,7 +92,7 @@ export function BezelTransferScreen() {
       </ScrollView>
 
       {/* Sticky Bottom Action Dock with Slide to Confirm */}
-      <View style={[styles.bottomDock, { paddingBottom: insets.bottom + 12 }]}>
+      <View style={[styles.bottomDock, { paddingBottom: safeBottom + 12 }]}>
         <SlideToConfirm
           label={`Slide to send $${amount}`}
           onConfirm={handleConfirm}
