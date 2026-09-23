@@ -51,21 +51,30 @@ It enforces **tactile touch**, **edge-to-edge fluid layouts**, **physics-driven 
 
 ### Option 1: Install as an Agent Skill (Recommended)
 
-Install Bezel into your AI coding assistant (Cursor, Claude Code, Codex, Antigravity) using the `skills` CLI:
+Install Bezel into your AI coding assistant (Cursor, Claude Code, Codex, Antigravity, Cline) via the `skills` CLI:
 
 ```bash
-# Add from GitHub
-npx skills add emerson-vieira/bezel
+# Add to current mobile project (interactive)
+npx skills add mensonones/bezel
 
-# Or point directly to the skill folder
-npx skills add ./skills/bezel
+# Add globally across all projects on your machine
+npx skills add mensonones/bezel -g
+
+# Add to specific AI agents directly (e.g. Cursor & Claude Code)
+npx skills add mensonones/bezel --agent cursor claude-code
+
+# Install non-interactively to all detected agents
+npx skills add mensonones/bezel --all
+
+# Or install from local cloned repository
+npx skills add .
 ```
 
 ### Option 2: Direct System Prompt / `.cursorrules`
 
-Copy the contents of [`bezel.md`](bezel.md) and paste it into:
-- Your project's `.cursorrules` file
-- Claude Code system instructions
+If your tool does not support skills, copy the contents of [`bezel.md`](bezel.md) and paste it into:
+- Your project's `.cursorrules` or `.windsurfrules` file
+- Claude Code project memory (`CLAUDE.md`) or system instructions
 - Antigravity / ChatGPT custom system prompt
 
 ---
