@@ -8,6 +8,9 @@ import Animated, {
   useSharedValue,
   withSpring,
   withSequence,
+  withTiming,
+  interpolate,
+  Extrapolation,
 } from 'react-native-reanimated';
 import { color, space, radius, type, mono, spring } from './theme';
 
@@ -23,6 +26,55 @@ const DAYS = [
   { day: 'S', completed: false },
 ];
 
+const SPARK_DEFS = [
+  { angle: 0, distance: 58, size: 8, bg: color.amber },
+  { angle: 45, distance: 64, size: 6, bg: color.ember },
+  { angle: 90, distance: 60, size: 8, bg: color.amber },
+  { angle: 135, distance: 64, size: 6, bg: color.mint },
+  { angle: 180, distance: 58, size: 8, bg: color.periwinkle },
+  { angle: 225, distance: 64, size: 6, bg: color.ember },
+  { angle: 270, distance: 60, size: 8, bg: color.amber },
+  { angle: 315, distance: 64, size: 6, bg: color.mint },
+];
+
+function Spark({
+  angle,
+  distance,
+  size,
+  bg,
+  progress,
+}: {
+  angle: number;
+  distance: number;
+  size: number;
+  bg: string;
+  progress: Animated.SharedValue<number>;
+}) {
+  const rad = (angle * Math.PI) / 180;
+  const targetX = Math.cos(rad) * distance;
+  const targetY = Math.sin(rad) * distance;
+
+  const sparkStyle = useAnimatedStyle(() => {
+    const p = progress.value;
+    const scale = interpolate(p, [0, 0.25, 1], [0, 1.3, 0], Extrapolation.CLAMP);
+    const opacity = interpolate(p, [0, 0.7, 1], [1, 0.8, 0], Extrapolation.CLAMP);
+    return {
+      width: size,
+      height: size,
+      borderRadius: size / 2,
+      backgroundColor: bg,
+      opacity,
+      transform: [
+        { translateX: targetX * p },
+        { translateY: targetY * p },
+        { scale },
+      ],
+    };
+  });
+
+  return <Animated.View style={[styles.spark, sparkStyle]} />;
+}
+
 export function BezelStreakScreen() {
   const insets = useSafeAreaInsets();
   const [streakCount, setStreakCount] = useState(14);
@@ -30,6 +82,7 @@ export function BezelStreakScreen() {
 
   const flameScale = useSharedValue(1);
   const buttonScale = useSharedValue(1);
+  const particleProgress = useSharedValue(0);
 
   const flameStyle = useAnimatedStyle(() => ({
     transform: [{ scale: flameScale.value }],
@@ -50,13 +103,23 @@ export function BezelStreakScreen() {
       withSpring(1.0, spring.gentle),
     );
 
+    particleProgress.value = 0;
+    particleProgress.value = withTiming(1, { duration: 650 });
+
     setTimeout(() => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }, 180);
 
     setCheckedIn(true);
     setStreakCount((prev) => prev + 1);
-  }, [checkedIn, flameScale]);
+  }, [checkedIn, flameScale, particleProgress]);
+
+  const handleReset = useCallback(() => {
+    Haptics.selectionAsync();
+    setCheckedIn(false);
+    setStreakCount(14);
+    particleProgress.value = 0;
+  }, [particleProgress]);
 
   return (
     <View style={styles.root}>
@@ -70,11 +133,23 @@ export function BezelStreakScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Milestone Hero with dynamic flame physics */}
+        {/* Milestone Hero with dynamic flame physics & celebration sparks */}
         <View style={styles.heroSection}>
-          <Animated.View style={[styles.flameBadge, flameStyle]}>
-            <Text style={styles.flameEmoji}>🔥</Text>
-          </Animated.View>
+          <View style={styles.badgeWrapper}>
+            <Animated.View style={[styles.flameBadge, flameStyle]}>
+              <Text style={styles.flameEmoji}>🔥</Text>
+            </Animated.View>
+            {SPARK_DEFS.map((s, i) => (
+              <Spark
+                key={i}
+                angle={s.angle}
+                distance={s.distance}
+                size={s.size}
+                bg={s.bg}
+                progress={particleProgress}
+              />
+            ))}
+          </View>
           <View style={styles.counterRow}>
             <Text style={styles.countText}>{streakCount}</Text>
             <Text style={styles.unitText}>DAYS</Text>
@@ -151,6 +226,19 @@ export function BezelStreakScreen() {
               {checkedIn ? '✓ Streak Logged for Today' : 'Claim Daily Check-in (+1)'}
             </Text>
           </AnimatedPressable>
+
+          {/* Reset / Replay Action */}
+          {checkedIn && (
+            <View style={styles.resetRow}>
+              <Pressable
+                onPress={handleReset}
+                hitSlop={12}
+                style={styles.resetChip}
+              >
+                <Text style={styles.resetText}>↺ Reset check-in for demo</Text>
+              </Pressable>
+            </View>
+          )}
         </View>
       </ScrollView>
     </View>
@@ -169,6 +257,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: space.xl,
   },
+  badgeWrapper: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: space.md,
+  },
+  spark: {
+    position: 'absolute',
+  },
   flameBadge: {
     width: 88,
     height: 88,
@@ -178,7 +275,6 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(245, 200, 113, 0.35)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: space.md,
   },
   flameEmoji: {
     fontSize: 44,
@@ -327,6 +423,23 @@ const styles = StyleSheet.create({
   },
   checkInButtonTextDone: {
     color: color.inkMuted,
+    fontWeight: '600',
+  },
+  resetRow: {
+    alignItems: 'center',
+    marginTop: space.md,
+  },
+  resetChip: {
+    paddingHorizontal: space.md,
+    paddingVertical: space.xs + 3,
+    borderRadius: radius.pill,
+    backgroundColor: color.surface,
+    borderWidth: 1,
+    borderColor: color.hairline,
+  },
+  resetText: {
+    ...type.caption,
+    color: color.amber,
     fontWeight: '600',
   },
 });

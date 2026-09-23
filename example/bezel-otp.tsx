@@ -134,8 +134,32 @@ export function BezelOtpScreen() {
       </Animated.View>
 
       <Text style={[styles.status, verified && styles.statusOk]}>
-        {verified ? 'Verified' : 'Waiting for code'}
+        {verified ? '✓ Code verified' : 'Waiting for code'}
       </Text>
+
+      <View style={styles.actionRow}>
+        {!verified ? (
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setCode('123456');
+            }}
+            style={styles.pasteChip}
+          >
+            <Text style={styles.pasteText}>📋 Autofill demo code (123456)</Text>
+          </Pressable>
+        ) : (
+          <Pressable
+            onPress={() => {
+              Haptics.selectionAsync();
+              setCode('');
+            }}
+            style={styles.pasteChip}
+          >
+            <Text style={styles.pasteText}>↺ Reset code</Text>
+          </Pressable>
+        )}
+      </View>
 
       <View style={[styles.pad, { paddingBottom: insets.bottom + space.md }]}>
         {KEYS.map((k, i) => (
@@ -195,6 +219,23 @@ const styles = StyleSheet.create({
     marginTop: space.lg,
   },
   statusOk: { color: color.mint, fontWeight: '700' },
+  actionRow: {
+    alignItems: 'center',
+    marginTop: space.md,
+  },
+  pasteChip: {
+    paddingHorizontal: space.md,
+    paddingVertical: space.xs + 3,
+    borderRadius: radius.pill,
+    backgroundColor: color.surface,
+    borderWidth: 1,
+    borderColor: color.hairline,
+  },
+  pasteText: {
+    ...type.caption,
+    color: color.violet,
+    fontWeight: '600',
+  },
   pad: {
     flexDirection: 'row',
     flexWrap: 'wrap',

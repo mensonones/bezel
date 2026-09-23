@@ -2,6 +2,7 @@
 import React, { useCallback } from 'react';
 import { StyleSheet, View, Text, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import * as Haptics from 'expo-haptics';
 import Animated, {
   useAnimatedStyle,
@@ -66,6 +67,7 @@ export function DemoShell({
 
   return (
     <View style={styles.root}>
+      <StatusBar style={mode === 'slop' ? 'dark' : 'light'} />
       <View style={[styles.header, { paddingTop: insets.top + space.sm }]}>
         <BackButton onBack={onBack} accent={accent} />
         <View style={styles.headerText}>

@@ -121,8 +121,22 @@ function DemoCard({ demo, onOpen }: { demo: Demo; onOpen: () => void }) {
   );
 }
 
+const FILTERS = ['All', 'G1 Utility', 'G3 Media', 'G4 Habits', 'Patterns'] as const;
+type Filter = (typeof FILTERS)[number];
+
 function Home({ onOpen }: { onOpen: (id: string) => void }) {
   const insets = useSafeAreaInsets();
+  const [filter, setFilter] = useState<Filter>('All');
+
+  const filteredDemos = DEMOS.filter((d) => {
+    if (filter === 'All') return true;
+    if (filter === 'G1 Utility') return d.id === 'transfer';
+    if (filter === 'G3 Media') return d.id === 'nowplaying';
+    if (filter === 'G4 Habits') return d.id === 'streak';
+    if (filter === 'Patterns') return ['keypad', 'otp', 'slide'].includes(d.id);
+    return true;
+  });
+
   return (
     <ScrollView
       style={styles.homeRoot}
@@ -138,8 +152,34 @@ function Home({ onOpen }: { onOpen: (id: string) => void }) {
         Every demo ships a Bezel build and its AI-slop twin. Toggle between them and
         feel the difference in your thumb.
       </Text>
+
+      {/* Tactile Genre Filter Chips */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.filterRow}
+      >
+        {FILTERS.map((f) => {
+          const active = filter === f;
+          return (
+            <Pressable
+              key={f}
+              onPress={() => {
+                Haptics.selectionAsync();
+                setFilter(f);
+              }}
+              style={[styles.filterChip, active && styles.filterChipActive]}
+            >
+              <Text style={[styles.filterChipText, active && styles.filterChipTextActive]}>
+                {f}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+
       <View style={styles.list}>
-        {DEMOS.map((d) => (
+        {filteredDemos.map((d) => (
           <DemoCard key={d.id} demo={d} onOpen={() => onOpen(d.id)} />
         ))}
       </View>
@@ -200,6 +240,32 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   list: { marginTop: space.xl, gap: space.md },
+  filterRow: {
+    flexDirection: 'row',
+    gap: space.sm,
+    marginTop: space.lg,
+  },
+  filterChip: {
+    paddingHorizontal: space.md,
+    paddingVertical: space.xs + 3,
+    borderRadius: radius.pill,
+    backgroundColor: color.surface,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: color.hairlineStrong,
+  },
+  filterChipActive: {
+    backgroundColor: color.periwinkle,
+    borderColor: color.periwinkle,
+  },
+  filterChipText: {
+    ...type.caption,
+    color: color.inkMuted,
+    fontWeight: '600',
+  },
+  filterChipTextActive: {
+    color: color.bg,
+    fontWeight: '700',
+  },
   card: {
     flexDirection: 'row',
     alignItems: 'center',

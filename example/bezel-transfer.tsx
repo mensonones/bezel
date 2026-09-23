@@ -1,4 +1,4 @@
-/* Bezel · pre-emit critique: T5 B5 P5 H4 G5 R5 */
+/* Bezel · pre-emit critique: T5 B5 P5 H5 G5 R5 */
 import React, { useState, useCallback } from 'react';
 import {
   StyleSheet,
@@ -15,12 +15,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { SlideToConfirm } from './SlideToConfirm';
+import { color, space, radius, type, mono, spring } from './theme';
 
-// ✅ BEZEL VERSION: Built to the Bezel Craft Standard
-// Features: Zero inline styles, OLED True Black, Inset Grouped Table with hairlines,
-// auto-scaling tabular numbers, slide-to-confirm friction, and Reanimated UI-thread springs.
-
-const SPRING_CONFIG = { damping: 15, stiffness: 300, mass: 0.8 };
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const RECENT_CONTACTS = [
   { id: '1', name: 'Alice Smith', tag: '@alice', initials: 'AS' },
@@ -28,37 +25,69 @@ const RECENT_CONTACTS = [
   { id: '3', name: 'Charlie Brown', tag: '@charlie', initials: 'CB' },
 ];
 
+const CHIPS = [10, 25, 50, 100];
+
+function Chip({
+  value,
+  onAdd,
+}: {
+  value: number;
+  onAdd: (val: number) => void;
+}) {
+  const scale = useSharedValue(1);
+  const style = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+
+  const handlePress = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onAdd(value);
+  }, [value, onAdd]);
+
+  return (
+    <AnimatedPressable
+      onPressIn={() => (scale.value = withSpring(0.92, spring.snappy))}
+      onPressOut={() => (scale.value = withSpring(1, spring.snappy))}
+      onPress={handlePress}
+      style={[styles.chip, style]}
+    >
+      <Text style={styles.chipText}>+${value}</Text>
+    </AnimatedPressable>
+  );
+}
+
 export function BezelTransferScreen() {
   const insets = useSafeAreaInsets();
   const safeBottom = insets.bottom || 34;
   const [selectedContact, setSelectedContact] = useState(RECENT_CONTACTS[0]);
-  const [amount, setAmount] = useState('50.00');
+  const [cents, setCents] = useState(5000); // $50.00
 
   const handleSelect = useCallback((contact: typeof RECENT_CONTACTS[0]) => {
     Haptics.selectionAsync();
     setSelectedContact(contact);
   }, []);
 
+  const handleAdd = useCallback((addedDollars: number) => {
+    setCents((prev) => prev + addedDollars * 100);
+  }, []);
+
+  const formattedAmount = (cents / 100).toFixed(2);
+
   const handleConfirm = useCallback(() => {
-    // High-consequence action confirmed via SlideToConfirm
-    console.log(`Transferred $${amount} to ${selectedContact.name}`);
-  }, [amount, selectedContact]);
+    console.log(`Transferred $${formattedAmount} to ${selectedContact.name}`);
+  }, [formattedAmount, selectedContact]);
 
   return (
     <View style={styles.canvas}>
-      {/* Scrollable Body bleeding edge-to-edge */}
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
           {
-            paddingTop: 8, // Bezel showcase chrome already owns the status-bar area
-            paddingBottom: safeBottom + 100, // Clearance for sticky slide-to-confirm
+            paddingTop: space.sm,
+            paddingBottom: safeBottom + 110,
           },
         ]}
         showsVerticalScrollIndicator={false}
         keyboardDismissMode="on-drag"
       >
-        {/* Navigation / Screen Title */}
         <View style={styles.header}>
           <Text style={styles.largeTitle}>Transfer Funds</Text>
           <Text style={styles.subtitle}>Instant Zero-Fee Settlement</Text>
@@ -67,10 +96,17 @@ export function BezelTransferScreen() {
         {/* Hero Amount Display (Tabular Figures) */}
         <View style={styles.amountContainer}>
           <Text style={styles.currencySymbol}>$</Text>
-          <Text style={styles.amountDisplay}>{amount}</Text>
+          <Text style={styles.amountDisplay}>{formattedAmount}</Text>
         </View>
 
-        {/* Section 1: Inset Grouped Recipient Table (No Card Fatigue) */}
+        {/* Tactile Quick Add Chips */}
+        <View style={styles.chipRow}>
+          {CHIPS.map((chipVal) => (
+            <Chip key={chipVal} value={chipVal} onAdd={handleAdd} />
+          ))}
+        </View>
+
+        {/* Inset Grouped Recipient Table */}
         <Text style={styles.sectionLabel}>RECENT RECIPIENTS</Text>
         <View style={styles.groupedContainer}>
           {RECENT_CONTACTS.map((contact, idx) => {
@@ -91,9 +127,9 @@ export function BezelTransferScreen() {
       </ScrollView>
 
       {/* Sticky Bottom Action Dock with Slide to Confirm */}
-      <View style={[styles.bottomDock, { paddingBottom: safeBottom + 12 }]}>
+      <View style={[styles.bottomDock, { paddingBottom: safeBottom + space.sm }]}>
         <SlideToConfirm
-          label={`Slide to send $${amount}`}
+          label={`Slide to send $${formattedAmount}`}
           onConfirm={handleConfirm}
         />
       </View>
@@ -101,7 +137,6 @@ export function BezelTransferScreen() {
   );
 }
 
-// Subcomponent: Tactile Contact Row with 0.5pt Hairline Dividers
 function ContactRow({
   contact,
   isSelected,
@@ -114,18 +149,17 @@ function ContactRow({
   onPress: () => void;
 }) {
   const scale = useSharedValue(1);
-
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
 
   const handlePressIn = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    scale.value = withSpring(0.97, SPRING_CONFIG);
+    scale.value = withSpring(0.97, spring.snappy);
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1.0, SPRING_CONFIG);
+    scale.value = withSpring(1.0, spring.snappy);
   };
 
   return (
@@ -153,81 +187,98 @@ function ContactRow({
 const styles = StyleSheet.create({
   canvas: {
     flex: 1,
-    backgroundColor: '#000000', // Pure OLED True Black Canvas
+    backgroundColor: color.bg,
   },
   scrollContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: space.lg,
   },
   header: {
-    marginBottom: 24,
+    marginBottom: space.lg,
   },
   largeTitle: {
-    fontSize: 34,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    letterSpacing: -0.5,
+    ...type.display,
+    color: color.ink,
   },
   subtitle: {
-    fontSize: 15,
-    color: '#8E8E93',
-    marginTop: 4,
+    ...type.body,
+    color: color.inkMuted,
+    marginTop: space.xs,
   },
   amountContainer: {
     flexDirection: 'row',
     alignItems: 'baseline',
     justifyContent: 'center',
-    paddingVertical: 20,
-    marginBottom: 16,
+    paddingVertical: space.md,
   },
   currencySymbol: {
     fontSize: 32,
     fontWeight: '600',
-    color: '#8E8E93',
-    marginRight: 4,
+    color: color.inkMuted,
+    marginRight: space.xs,
   },
   amountDisplay: {
     fontSize: 54,
     fontWeight: '700',
-    color: '#FFFFFF',
-    fontVariant: ['tabular-nums'], // Gate 43: Zero Jitter
+    color: color.ink,
+    fontFamily: mono,
+    fontVariant: ['tabular-nums'],
     letterSpacing: -1,
   },
+  chipRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: space.sm,
+    marginBottom: space.xl,
+  },
+  chip: {
+    backgroundColor: color.surface,
+    paddingHorizontal: space.md,
+    paddingVertical: space.xs + 2,
+    borderRadius: radius.pill,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: color.hairlineStrong,
+  },
+  chipText: {
+    ...type.caption,
+    fontFamily: mono,
+    fontVariant: ['tabular-nums'],
+    color: color.periwinkle,
+    fontWeight: '700',
+  },
   sectionLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#8E8E93',
-    marginBottom: 8,
-    marginLeft: 4,
-    letterSpacing: 0.5,
+    ...type.overline,
+    color: color.inkFaint,
+    marginBottom: space.sm,
+    marginLeft: space.xs,
   },
   groupedContainer: {
-    backgroundColor: '#1C1C1E', // Inset Grouped Surface Layer
-    borderRadius: 16,
+    backgroundColor: color.surface,
+    borderRadius: radius.lg,
     overflow: 'hidden',
-    borderWidth: 0.5,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: color.hairline,
   },
   row: {
     minHeight: 56,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: space.lg,
+    paddingVertical: space.sm + 2,
   },
   rowSelected: {
-    backgroundColor: 'rgba(10, 132, 255, 0.08)',
+    backgroundColor: 'rgba(122, 162, 247, 0.08)',
   },
   avatar: {
     width: 38,
     height: 38,
-    borderRadius: 19,
-    backgroundColor: '#2C2C2E',
+    borderRadius: radius.pill,
+    backgroundColor: color.surfaceHi,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: space.md,
   },
   avatarText: {
-    color: '#FFFFFF',
+    color: color.ink,
     fontWeight: '600',
     fontSize: 14,
   },
@@ -235,24 +286,22 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contactName: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    letterSpacing: -0.2,
+    ...type.headline,
+    color: color.ink,
   },
   contactTag: {
-    fontSize: 13,
-    color: '#8E8E93',
+    ...type.caption,
+    color: color.inkMuted,
     marginTop: 2,
   },
   checkMark: {
-    color: '#0A84FF',
+    color: color.periwinkle,
     fontSize: 18,
     fontWeight: '700',
   },
   divider: {
-    height: 0.5,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)', // Hairline divider indented past avatar
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: color.hairline,
     marginLeft: 66,
   },
   bottomDock: {
@@ -260,10 +309,10 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(10, 10, 12, 0.92)',
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    borderTopWidth: 0.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'rgba(11, 11, 15, 0.94)',
+    paddingHorizontal: space.lg,
+    paddingTop: space.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: color.hairline,
   },
 });

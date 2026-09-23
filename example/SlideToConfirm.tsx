@@ -7,9 +7,11 @@ import Animated, {
   withSpring,
   runOnJS,
   interpolate,
+  interpolateColor,
   Extrapolation,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
+import { color, space, radius, spring, type } from './theme';
 
 interface SlideToConfirmProps {
   label: string;
@@ -18,7 +20,6 @@ interface SlideToConfirmProps {
 
 const KNOB_SIZE = 48;
 const PADDING = 4;
-const SPRING_CONFIG = { damping: 20, stiffness: 250, mass: 0.8 };
 
 export const SlideToConfirm: React.FC<SlideToConfirmProps> = ({ label, onConfirm }) => {
   const [trackWidth, setTrackWidth] = useState(0);
@@ -44,28 +45,43 @@ export const SlideToConfirm: React.FC<SlideToConfirmProps> = ({ label, onConfirm
     .onEnd(() => {
       if (isComplete.value) return;
       if (translateX.value > maxTranslate * 0.85) {
-        translateX.value = withSpring(maxTranslate, SPRING_CONFIG);
+        translateX.value = withSpring(maxTranslate, spring.snappy);
         isComplete.value = true;
         runOnJS(triggerConfirm)();
       } else {
-        translateX.value = withSpring(0, SPRING_CONFIG);
+        translateX.value = withSpring(0, spring.gentle);
       }
     });
 
-  const knobStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX.value }],
-  }));
+  const knobStyle = useAnimatedStyle(() => {
+    const bgColor = interpolateColor(
+      translateX.value,
+      [0, maxTranslate * 0.65, maxTranslate * 0.9],
+      [color.periwinkle, color.periwinkle, color.mint]
+    );
+    return {
+      transform: [{ translateX: translateX.value }],
+      backgroundColor: bgColor,
+    };
+  });
 
   const textStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(translateX.value, [0, maxTranslate * 0.6], [1, 0], Extrapolation.CLAMP),
+    opacity: interpolate(translateX.value, [0, maxTranslate * 0.5], [1, 0], Extrapolation.CLAMP),
   }));
+
+  const arrowStyle = useAnimatedStyle(() => {
+    const rot = interpolate(translateX.value, [0, maxTranslate * 0.85], [0, 90], Extrapolation.CLAMP);
+    return {
+      transform: [{ rotate: `${rot}deg` }],
+    };
+  });
 
   return (
     <View onLayout={handleLayout} style={styles.track}>
       <Animated.Text style={[styles.label, textStyle]}>{label}</Animated.Text>
       <GestureDetector gesture={pan}>
         <Animated.View style={[styles.knob, knobStyle]}>
-          <Text style={styles.arrow}>→</Text>
+          <Animated.Text style={[styles.arrow, arrowStyle]}>→</Animated.Text>
         </Animated.View>
       </GestureDetector>
     </View>
@@ -75,35 +91,31 @@ export const SlideToConfirm: React.FC<SlideToConfirmProps> = ({ label, onConfirm
 const styles = StyleSheet.create({
   track: {
     height: 56,
-    backgroundColor: '#1C1C1E',
-    borderRadius: 28,
+    backgroundColor: color.surface,
+    borderRadius: radius.pill,
     padding: PADDING,
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: color.hairlineStrong,
   },
   label: {
+    ...type.body,
     position: 'absolute',
     alignSelf: 'center',
-    color: '#8E8E93',
-    fontSize: 15,
+    color: color.inkMuted,
     fontWeight: '600',
-    letterSpacing: -0.2,
   },
   knob: {
     width: KNOB_SIZE,
     height: KNOB_SIZE,
-    borderRadius: KNOB_SIZE / 2,
-    backgroundColor: '#0A84FF',
+    borderRadius: radius.pill,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   arrow: {
-    color: '#FFFFFF',
+    color: color.bg,
     fontSize: 20,
     fontWeight: '700',
   },

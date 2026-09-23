@@ -26,9 +26,11 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 function Key({
   label,
   onPress,
+  onLongPress,
 }: {
   label: string;
   onPress: (label: string) => void;
+  onLongPress?: (label: string) => void;
 }) {
   const scale = useSharedValue(1);
   const bg = useSharedValue(0);
@@ -39,6 +41,13 @@ function Key({
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onPress(label);
   }, [label, onPress]);
+
+  const handleLong = useCallback(() => {
+    if (onLongPress) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      onLongPress(label);
+    }
+  }, [label, onLongPress]);
 
   return (
     <AnimatedPressable
@@ -51,6 +60,7 @@ function Key({
         bg.value = withTiming(0, { duration: duration.base });
       }}
       onPress={handle}
+      onLongPress={handleLong}
       style={[styles.key, style]}
     >
       <Animated.View style={[styles.keyOverlay, overlay]} />
@@ -73,6 +83,10 @@ export function BezelKeypadScreen() {
     });
   }, []);
 
+  const clearAll = useCallback(() => {
+    setCents(0);
+  }, []);
+
   const amount = useMemo(() => formatUSD(cents), [cents]);
   const ready = cents > 0;
 
@@ -87,15 +101,21 @@ export function BezelKeypadScreen() {
         <Text style={styles.label}>Amount to send</Text>
         <Animated.View style={[styles.amountRow, displayStyle]}>
           <Text style={styles.currency}>$</Text>
-          <Text style={styles.amount}>{amount}</Text>
+          <Text style={cents > 1000000 ? styles.amountSmall : styles.amount}>{amount}</Text>
         </Animated.View>
-        <Text style={styles.hint}>Daily limit $99,999.00</Text>
+        <Text style={styles.hint}>
+          {ready ? 'Hold ⌫ to clear · Limit $99,999.00' : 'Daily limit $99,999.00'}
+        </Text>
       </View>
 
       <View style={styles.pad}>
         {KEYS.map((k) => (
           <View key={k} style={styles.keyCell}>
-            <Key label={k} onPress={press} />
+            <Key
+              label={k}
+              onPress={press}
+              onLongPress={k === '⌫' ? clearAll : undefined}
+            />
           </View>
         ))}
       </View>
@@ -156,6 +176,13 @@ const styles = StyleSheet.create({
     fontSize: 64,
     fontWeight: '700',
     letterSpacing: -1.5,
+    fontVariant: ['tabular-nums'],
+  },
+  amountSmall: {
+    color: color.ink,
+    fontSize: 44,
+    fontWeight: '700',
+    letterSpacing: -1,
     fontVariant: ['tabular-nums'],
   },
   hint: { ...type.caption, color: color.inkFaint, marginTop: space.sm },

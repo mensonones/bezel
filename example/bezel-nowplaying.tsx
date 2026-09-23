@@ -1,12 +1,14 @@
 /* Bezel · pre-emit critique: T5 B5 P5 H5 G5 R5 */
-import React, { useCallback, useState } from 'react';
-import { StyleSheet, View, Text, Pressable } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { StyleSheet, View, Text, Pressable, LayoutChangeEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
+  runOnJS,
 } from 'react-native-reanimated';
 import { color, space, radius, type, mono, spring } from './theme';
 
@@ -22,10 +24,14 @@ export function BezelNowPlayingScreen() {
   const insets = useSafeAreaInsets();
   const [playing, setPlaying] = useState(true);
   const [position, setPosition] = useState(148); // 2:28
+  const [isFavorite, setIsFavorite] = useState(true);
+  const [shuffle, setShuffle] = useState(false);
+  const [repeat, setRepeat] = useState(false);
   const duration = 245; // 4:05
 
   const artScale = useSharedValue(1);
   const playButtonScale = useSharedValue(1);
+  const favScale = useSharedValue(1);
 
   const artAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: artScale.value }],
@@ -33,6 +39,10 @@ export function BezelNowPlayingScreen() {
 
   const playButtonAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: playButtonScale.value }],
+  }));
+
+  const favAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: favScale.value }],
   }));
 
   const togglePlay = useCallback(() => {
@@ -44,10 +54,30 @@ export function BezelNowPlayingScreen() {
     });
   }, [artScale]);
 
-  const handleSeek = useCallback((ratio: number) => {
-    Haptics.selectionAsync();
-    setPosition(Math.round(ratio * duration));
-  }, [duration]);
+  const toggleFavorite = useCallback(() => {
+    setIsFavorite((prev) => {
+      const next = !prev;
+      favScale.value = withSpring(1.3, spring.snappy, () => {
+        favScale.value = withSpring(1.0, spring.gentle);
+      });
+      if (next) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } else {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+      return next;
+    });
+  }, [favScale]);
+
+  const toggleShuffle = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setShuffle((s) => !s);
+  }, []);
+
+  const toggleRepeat = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setRepeat((r) => !r);
+  }, []);
 
   return (
     <View style={styles.root}>
@@ -75,49 +105,32 @@ export function BezelNowPlayingScreen() {
           </Text>
           <Text style={styles.artistName}>Cortex & The Void Ensemble</Text>
         </View>
-        <Pressable
-          onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+        <AnimatedPressable
+          onPress={toggleFavorite}
           hitSlop={12}
-          style={styles.favoriteButton}
+          style={[styles.favoriteButton, isFavorite && styles.favoriteActive, favAnimatedStyle]}
         >
-          <Text style={styles.favoriteGlyph}>♥</Text>
-        </Pressable>
+          <Text style={[styles.favoriteGlyph, isFavorite && styles.favoriteGlyphActive]}>
+            {isFavorite ? '♥' : '♡'}
+          </Text>
+        </AnimatedPressable>
       </View>
 
-      {/* Scrub Bar with generous tap/drag area & Tabular Time */}
-      <View style={styles.scrubberContainer}>
-        <Pressable
-          onPress={(e) => {
-            const { locationX } = e.nativeEvent;
-            // assume standard 340pt scrub width approx
-            const ratio = Math.max(0, Math.min(1, locationX / 320));
-            handleSeek(ratio);
-          }}
-          style={styles.scrubTrackHitbox}
-        >
-          <View style={styles.scrubTrackBg}>
-            <View
-              style={[
-                styles.scrubTrackFill,
-                { width: `${(position / duration) * 100}%` },
-              ]}
-            />
-          </View>
-        </Pressable>
-        <View style={styles.timeRow}>
-          <Text style={styles.timeText}>{formatTime(position)}</Text>
-          <Text style={styles.timeText}>-{formatTime(duration - position)}</Text>
-        </View>
-      </View>
+      {/* Tactile Gestural Scrubber */}
+      <Scrubber
+        position={position}
+        duration={duration}
+        onSeek={setPosition}
+      />
 
       {/* Fluid Transport Controls in Bottom Thumb Zone */}
       <View style={[styles.transportDock, { paddingBottom: insets.bottom + space.lg }]}>
         <Pressable
-          onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+          onPress={toggleShuffle}
           hitSlop={16}
-          style={styles.secondaryTransport}
+          style={[styles.secondaryTransport, shuffle && styles.secondaryActive]}
         >
-          <Text style={styles.transportGlyph}>⇄</Text>
+          <Text style={[styles.transportGlyph, shuffle && styles.glyphActive]}>⇄</Text>
         </Pressable>
 
         <Pressable
@@ -152,12 +165,110 @@ export function BezelNowPlayingScreen() {
         </Pressable>
 
         <Pressable
-          onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}
+          onPress={toggleRepeat}
           hitSlop={16}
-          style={styles.secondaryTransport}
+          style={[styles.secondaryTransport, repeat && styles.secondaryActive]}
         >
-          <Text style={styles.transportGlyph}>↻</Text>
+          <Text style={[styles.transportGlyph, repeat && styles.glyphActive]}>↻</Text>
         </Pressable>
+      </View>
+    </View>
+  );
+}
+
+function Scrubber({
+  position,
+  duration,
+  onSeek,
+}: {
+  position: number;
+  duration: number;
+  onSeek: (seconds: number) => void;
+}) {
+  const [trackWidth, setTrackWidth] = useState(300);
+  const [displayPos, setDisplayPos] = useState(position);
+  const isDragging = useSharedValue(false);
+  const progress = useSharedValue(duration > 0 ? position / duration : 0);
+  const knobScale = useSharedValue(0.6);
+  const trackHeight = useSharedValue(4);
+
+  useEffect(() => {
+    if (!isDragging.value && duration > 0) {
+      progress.value = position / duration;
+      setDisplayPos(position);
+    }
+  }, [position, duration, isDragging, progress]);
+
+  const fireHapticTick = () => {
+    Haptics.selectionAsync();
+  };
+
+  const updateScrubTime = (ratio: number) => {
+    setDisplayPos(Math.round(ratio * duration));
+  };
+
+  const commitSeek = (ratio: number) => {
+    const target = Math.round(ratio * duration);
+    onSeek(target);
+    setDisplayPos(target);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
+  const pan = Gesture.Pan()
+    .minDistance(0)
+    .onBegin((e) => {
+      'worklet';
+      isDragging.value = true;
+      knobScale.value = withSpring(1.1, spring.snappy);
+      trackHeight.value = withSpring(7, spring.snappy);
+      const ratio = Math.max(0, Math.min(1, e.x / (trackWidth || 1)));
+      progress.value = ratio;
+      runOnJS(fireHapticTick)();
+      runOnJS(updateScrubTime)(ratio);
+    })
+    .onUpdate((e) => {
+      'worklet';
+      const ratio = Math.max(0, Math.min(1, e.x / (trackWidth || 1)));
+      progress.value = ratio;
+      runOnJS(updateScrubTime)(ratio);
+    })
+    .onFinalize(() => {
+      'worklet';
+      isDragging.value = false;
+      knobScale.value = withSpring(0.6, spring.snappy);
+      trackHeight.value = withSpring(4, spring.snappy);
+      runOnJS(commitSeek)(progress.value);
+    });
+
+  const fillStyle = useAnimatedStyle(() => ({
+    width: `${Math.max(0, Math.min(1, progress.value)) * 100}%`,
+  }));
+
+  const knobStyle = useAnimatedStyle(() => ({
+    left: `${Math.max(0, Math.min(1, progress.value)) * 100}%`,
+    transform: [{ translateX: -7 }, { scale: knobScale.value }],
+  }));
+
+  const trackBgStyle = useAnimatedStyle(() => ({
+    height: trackHeight.value,
+  }));
+
+  return (
+    <View
+      style={styles.scrubberContainer}
+      onLayout={(e: LayoutChangeEvent) => setTrackWidth(e.nativeEvent.layout.width)}
+    >
+      <GestureDetector gesture={pan}>
+        <Animated.View style={styles.scrubTrackHitbox}>
+          <Animated.View style={[styles.scrubTrackBg, trackBgStyle]}>
+            <Animated.View style={[styles.scrubTrackFill, fillStyle]} />
+          </Animated.View>
+          <Animated.View style={[styles.scrubKnob, knobStyle]} />
+        </Animated.View>
+      </GestureDetector>
+      <View style={styles.timeRow}>
+        <Text style={styles.timeText}>{formatTime(displayPos)}</Text>
+        <Text style={styles.timeText}>-{formatTime(Math.max(0, duration - displayPos))}</Text>
       </View>
     </View>
   );
@@ -256,6 +367,13 @@ const styles = StyleSheet.create({
   },
   favoriteGlyph: {
     fontSize: 20,
+    color: color.inkMuted,
+  },
+  favoriteActive: {
+    backgroundColor: 'rgba(255, 138, 91, 0.15)',
+    borderColor: 'rgba(255, 138, 91, 0.35)',
+  },
+  favoriteGlyphActive: {
     color: color.ember,
   },
   scrubberContainer: {
@@ -264,6 +382,7 @@ const styles = StyleSheet.create({
   scrubTrackHitbox: {
     height: 36,
     justifyContent: 'center',
+    position: 'relative',
   },
   scrubTrackBg: {
     height: 4,
@@ -275,6 +394,17 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: color.ember,
     borderRadius: radius.pill,
+  },
+  scrubKnob: {
+    position: 'absolute',
+    top: '50%',
+    marginTop: -7,
+    width: 14,
+    height: 14,
+    borderRadius: radius.pill,
+    backgroundColor: color.ink,
+    borderWidth: 2,
+    borderColor: color.ember,
   },
   timeRow: {
     flexDirection: 'row',
@@ -300,9 +430,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  secondaryActive: {
+    backgroundColor: 'rgba(255, 138, 91, 0.12)',
+    borderRadius: radius.pill,
+  },
   transportGlyph: {
     fontSize: 18,
     color: color.inkMuted,
+  },
+  glyphActive: {
+    color: color.ember,
   },
   skipButton: {
     width: 48,

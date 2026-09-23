@@ -18,12 +18,13 @@ Every demo features an in-app toggle (**Bezel ✨ ↔ Slop ❌**) letting you co
 
 | # | Demo | Genre / Spec | Bezel Features | Slop Defects |
 |---|---|---|---|---|
-| **1** | **Send Money** | `G1 · Tactile Utility` | OLED True Black, Inset Grouped table, `0.5pt` hairlines, tabular figures, bottom thumb dock. | 3 isolated floating cards with gray drop shadows, letterboxed status bar, dead touch. |
-| **2** | **Amount Keypad** | `D03 · Currency Entry` | Custom numeric keypad, per-key spring feedback, instant light haptics, strictly tabular monospace digits. | System keyboard that covers the view, jittery text reflow, zero haptics. |
-| **3** | **Verification Code** | `D02 · One-Time Code` | 6 tactile cells, animated active box highlight, smooth spring filling, auto-submit on completion. | 6 disconnected text inputs, erratic focus transitions, no haptic confirmation. |
-| **4** | **Slide to Confirm** | `A02 · Commit Gesture` | 85% travel threshold, logarithmic rubber-banding, spring return, success notification haptic. | Flat standard button, accidental double-tap risk, zero physical confirmation. |
-| **5** | **Now Playing** | `G3 · Atmospheric` | Deep atmospheric tone, spring-scaled album art (1.0 vs 0.92), large scrubber hitbox, tabular time. | Neon purple box shadow, tiny non-accessible scrubber, abrupt transitions. |
-| **6** | **Daily Streak** | `G4 · Expressive` | Flame milestone physics bounce, weekly dot progress strip, multi-stage celebration haptic cascade. | Flat static gray card, generic claim button, apologetic "Oops!" microcopy. |
+| **1** | **Send Money** | `G1 · Tactile Utility` | OLED True Black, Inset Grouped table, `0.5pt` hairlines, tabular figures, **tactile quick-add chips (`+$10`, `+$25`, `+$50`, `+$100`)**, bottom thumb dock with SlideToConfirm. | 3 isolated floating cards with gray drop shadows, letterboxed status bar, dead touch. |
+| **2** | **Amount Keypad** | `D03 · Currency Entry` | Custom numeric keypad, per-key spring feedback, instant light haptics, strictly tabular monospace digits, **hold ⌫ with Heavy haptic to clear all**, dynamic font scaling. | System keyboard that covers the view, jittery text reflow, zero haptics. |
+| **3** | **Verification Code** | `D02 · One-Time Code` | 6 tactile cells, animated active box highlight, smooth spring filling, **one-tap demo autofill chip (`123456`)**, reset action, error shake sequence. | 6 disconnected text inputs, erratic focus transitions, no haptic confirmation. |
+| **4** | **Slide to Confirm** | `A02 · Commit Gesture` | 85% travel threshold, logarithmic rubber-banding, **color interpolation (periwinkle → mint)**, rotating arrow, spring return, success notification haptic. | Flat standard button, accidental double-tap risk, zero physical confirmation. |
+| **5** | **Now Playing** | `G3 · Atmospheric` | Deep atmospheric tone, spring-scaled album art (1.0 vs 0.92), **continuous gestural Pan scrubber with real-time haptic ticks**, active favorite button, tabular time. | Neon purple box shadow, tiny non-accessible scrubber, abrupt transitions. |
+| **6** | **Daily Streak** | `G4 · Expressive` | Flame milestone physics bounce, **celebration spark particle micro-burst**, weekly dot progress strip, reset action, multi-stage celebration haptic cascade. | Flat static gray card, generic claim button, apologetic "Oops!" microcopy. |
+| **—** | **Gallery Home** | `Router` | **Tactile genre filter chips (`All`, `G1 Utility`, `G3 Media`, `G4 Habits`, `Patterns`)**, spring-depressed cards, dynamic safe area padding. | Static unorganized list, zero filter capabilities. |
 
 ---
 

@@ -108,3 +108,20 @@ Scan the QR code with **Expo Go** (iOS or Android):
   - Atmospheric depth vs generic neon purple drop shadows.
   - Seamless edge-to-edge bleed vs rigid letterboxing.
 
+---
+
+## 4. Multi-Screen Craft Elevation (Before vs. After)
+
+All showcase screens are verified against the Bezel Quality Gates and capture the tangible difference between default AI generation and production mobile craftsmanship:
+
+| Screen | Baseline Defect | Bezel Craft Elevation |
+|---|---|---|
+| **Gallery Home** | Static linear list with no quick navigation | Tactile genre filter chips (`All`, `G1 Utility`, `G3 Media`, `G4 Habits`, `Patterns`) with selection haptics. |
+| **Transfer Funds** | Manual input, isolated floating cards | Tactile quick-add chips (`+$10`, `+$25`, `+$50`, `+$100`), Inset Grouped table, and SlideToConfirm integration. |
+| **Currency Keypad** | Fixed font clipping, single-tap backspace only | Tabular figures, dynamic font size scaling for large values, and **long-press ⌫ with Heavy haptic** to clear all. |
+| **Verification Code** | Disconnected inputs, manual typing only | 6 spring-filled cells, **one-tap demo autofill chip (`123456`)**, reset action, and error shake physics. |
+| **Slide to Confirm** | Abrupt color change, static knob arrow | **Color interpolation** (periwinkle → mint past 70% drag), rotating directional arrow, and progressive label fade. |
+| **Now Playing** | Discrete tap-only seek, rigid controls | **Continuous gestural Pan scrubber** with 120Hz knob follow, real-time haptic ticks, and interactive favorite/playback states. |
+| **Daily Streak** | Static flame, flat button | Dynamic spring flame physics, **radial celebration spark burst**, milestone progress bar, and replay/reset action. |
+
+
