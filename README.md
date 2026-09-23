@@ -67,8 +67,12 @@ How do you know Bezel actually works? We tested the exact same prompt with a sta
 | **Action Trigger** | Accidental single-tap button | **`A02 · Slide to Confirm`** with haptic lock |
 
 - 📊 **Full Shootout & Analysis:** See [`BENCHMARK.md`](BENCHMARK.md).
-- 🤖 **Automated Audit CLI:** Run `npm run audit ./example/bezel-transfer.tsx`.
-- 📱 **Interactive App Demo:** Run `cd example && npm start` to touch and compare on your phone.
+- 🤖 **Automated Audit CLI:** Run `npm test` (audits all 6 showcase screens).
+- 📱 **Interactive Showcase Gallery:** See [`example/README.md`](example/README.md) or run `npm run emulator && cd example && npx expo start --android`.
+
+<p align="center">
+  <img src="docs/assets/gallery-overview.png" alt="Bezel Native Multi-Screen Showcase" width="100%" />
+</p>
 
 ---
 

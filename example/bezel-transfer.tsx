@@ -30,7 +30,6 @@ const RECENT_CONTACTS = [
 
 export function BezelTransferScreen() {
   const insets = useSafeAreaInsets();
-  const safeTop = insets.top || 54;
   const safeBottom = insets.bottom || 34;
   const [selectedContact, setSelectedContact] = useState(RECENT_CONTACTS[0]);
   const [amount, setAmount] = useState('50.00');
@@ -52,7 +51,7 @@ export function BezelTransferScreen() {
         contentContainerStyle={[
           styles.scrollContent,
           {
-            paddingTop: safeTop + 16,
+            paddingTop: 8, // Bezel showcase chrome already owns the status-bar area
             paddingBottom: safeBottom + 100, // Clearance for sticky slide-to-confirm
           },
         ]}

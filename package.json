@@ -8,7 +8,8 @@
   },
   "scripts": {
     "audit": "node ./scripts/audit-slop.js",
-    "test": "node ./scripts/audit-slop.js ./example/bezel-transfer.tsx"
+    "test": "for f in example/bezel-*.tsx; do node ./scripts/audit-slop.js \"$f\" || exit 1; done",
+    "emulator": "bash ./scripts/run-emulator.sh"
   },
   "repository": {
     "type": "git",

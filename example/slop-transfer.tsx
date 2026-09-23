@@ -28,7 +28,7 @@ export function SlopTransferScreen() {
 
   return (
     // ❌ Slop: Hardcoded status bar letterboxing (Gate 1 & 3)
-    <View style={{ flex: 1, backgroundColor: '#F5F5F7', paddingTop: 45 }}>
+    <View style={{ flex: 1, backgroundColor: '#F5F5F7', paddingTop: 12 }}>
       {/* ❌ Slop: Centered generic header with no native collapsible structure */}
       <View style={{ paddingHorizontal: 16, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: '#E5E5EA' }}>
         <Text style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center', color: '#000' }}>

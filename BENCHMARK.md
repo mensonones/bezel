@@ -80,19 +80,31 @@ Result: ✔ PASSED BEZEL CRAFT STANDARD
 
 ---
 
-## 3. Physical & Interactive Proof (Touch It on Your Phone)
+## 3. Physical & Interactive Proof (Run in Emulator or on Phone)
 
-You can run the interactive comparison app on your own device via Expo:
+You can run the interactive 6-screen showcase on an Android emulator or on your physical device via Expo:
 
+### Run in Android Emulator:
+```bash
+# Launch & wait for emulator boot (idempotent)
+npm run emulator
+
+# Launch showcase on Android
+cd example
+npx expo start --android
+```
+
+### Run on Your Physical Phone:
 ```bash
 cd example
-npm install
-npm start
+npx expo start
 ```
 
 Scan the QR code with **Expo Go** (iOS or Android):
-- Tap the top floating switcher to toggle between **AI-Slop Mode** and **Bezel Craft**.
-- Feel the difference in:
-  - Finger scale depression on contact rows.
+- Navigate between the 6 distinct mobile demos (**Send Money**, **Currency Keypad**, **OTP Verification**, **Slide to Confirm**, **Now Playing**, and **Daily Streak**).
+- Tap the top-right **Slop ↔ Bezel** toggle in any demo to feel the difference:
+  - Spring scale depression on interactive rows and custom keypads.
   - The mechanical resistance and haptic lock of `Slide to Confirm`.
-  - Seamless edge-to-edge status bar bleed vs rigid letterboxing.
+  - Atmospheric depth vs generic neon purple drop shadows.
+  - Seamless edge-to-edge bleed vs rigid letterboxing.
+
