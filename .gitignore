@@ -6,3 +6,5 @@ example/dist/
 example/.expo/
 *.log
 .DS_Store
+.agents/
+skills-lock.json
